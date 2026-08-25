@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Porsche Analytics Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        porsche: {
+                            red: '#D5001C',
+                            black: '#0A0A0A',
+                            dark: '#141414',
+                            gray: '#2C2C2C',
+                            light: '#E2E8F0'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0A0A0A;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for an elegant look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0A0A0A;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2C2C2C;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #D5001C;
+        }
+        .glass-panel {
+            background: rgba(20, 20, 20, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .porsche-title {
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <header class="sticky top-0 z-50 glass-panel border-b border-white/10 px-6 py-4 flex justify-between items-center shadow-2xl">
+        <div class="flex items-center gap-4">
+            <!-- Simplified Porsche Logo Representation -->
+            <div class="w-8 h-10 border border-porsche-red relative overflow-hidden rounded-sm flex items-center justify-center bg-porsche-dark shadow-[0_0_15px_rgba(213,0,28,0.3)]">
+                <div class="w-6 h-6 border border-yellow-500 rounded-sm rotate-45 scale-75"></div>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold porsche-title text-white">Porsche</h1>
+                <p class="text-xs text-gray-400 uppercase tracking-widest">Sales Intelligence</p>
+            </div>
+        </div>
+        <div class="hidden md:flex items-center gap-3 text-sm text-gray-400">
+            <span class="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            Lendo base: <span class="text-white font-mono">8683bed0-cc33-4e06-bca9-04db9c31f9e2.xlsx</span>
+        </div>
+    </header>
+
+    <main class="flex-1 p-4 md:p-6 lg:p-8 space-y-6">
+        
+        <!-- Filters Section -->
+        <section class="glass-panel p-4 rounded-xl flex flex-col lg:flex-row gap-4 items-end shadow-lg">
+            <div class="w-full lg:w-1/4">
+                <label class="block text-xs uppercase tracking-wider text-gray-400 mb-2">Modelo</label>
+                <select id="filter-model" class="w-full bg-porsche-dark border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-porsche-red transition-colors cursor-pointer">
+                    <option value="all">Todos os Modelos</option>
+                </select>
+            </div>
+            
+            <div class="w-full lg:w-1/4">
+                <label class="block text-xs uppercase tracking-wider text-gray-400 mb-2">Ano do Modelo</label>
+                <select id="filter-year" class="w-full bg-porsche-dark border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-porsche-red transition-colors cursor-pointer">
+                    <option value="all">Todos os Anos</option>
+                </select>
+            </div>
+            
+            <div class="w-full lg:w-1/4">
+                <label class="block text-xs uppercase tracking-wider text-gray-400 mb-2">Cidade</label>
+                <select id="filter-city" class="w-full bg-porsche-dark border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-porsche-red transition-colors cursor-pointer">
+                    <option value="all">Todas as Cidades</option>
+                </select>
+            </div>
+
+            <div class="w-full lg:w-1/4">
+                <label class="block text-xs uppercase tracking-wider text-gray-400 mb-2">Método de Pagto.</label>
+                <select id="filter-pay" class="w-full bg-porsche-dark border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-porsche-red transition-colors cursor-pointer">
+                    <option value="all">Todos os Métodos</option>
+                </select>
+            </div>
+            
+            <button id="reset-filters" class="w-full lg:w-auto px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm uppercase tracking-wider transition-all text-gray-300">
+                Limpar
+            </button>
+        </section>
+
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="glass-panel p-6 rounded-xl border-l-4 border-l-porsche-red relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform">
+                    <svg width="120" height="120" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                </div>
+                <h3 class="text-xs uppercase tracking-widest text-gray-400 mb-1">Volume de Vendas</h3>
+                <p id="kpi-total-sales" class="text-3xl font-bold text-white">0</p>
+                <p class="text-xs text-green-500 mt-2 flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                    Total filtrado
+                </p>
+            </div>
+
+            <div class="glass-panel p-6 rounded-xl relative overflow-hidden group">
+                <h3 class="text-xs uppercase tracking-widest text-gray-400 mb-1">Modelo Mais Vendido</h3>
+                <p id="kpi-top-model" class="text-2xl font-bold text-white mt-2">N/A</p>
+                <p id="kpi-top-model-vol" class="text-xs text-gray-500 mt-2">0 unidades</p>
+            </div>
+
+            <div class="glass-panel p-6 rounded-xl relative overflow-hidden group">
+                <h3 class="text-xs uppercase tracking-widest text-gray-400 mb-1">Melhor Cidade</h3>
+                <p id="kpi-top-city" class="text-2xl font-bold text-white mt-2">N/A</p>
+                <p id="kpi-top-city-vol" class="text-xs text-gray-500 mt-2">0 unidades</p>
+            </div>
+
+            <div class="glass-panel p-6 rounded-xl relative overflow-hidden group">
+                <h3 class="text-xs uppercase tracking-widest text-gray-400 mb-1">Ano Mod. Destaque</h3>
+                <p id="kpi-top-year" class="text-2xl font-bold text-white mt-2">N/A</p>
+                <p id="kpi-top-year-vol" class="text-xs text-gray-500 mt-2">0 unidades</p>
+            </div>
+        </section>
+
+        <section class="glass-panel p-6 rounded-xl border border-porsche-red/30 bg-gradient-to-br from-[#141414] to-[#1a0505]">
+            <h2 class="text-sm uppercase tracking-widest font-semibold mb-4 text-porsche-red flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                Insights de Negócio
+            </h2>
+            <div id="insights-container" class="space-y-3 text-sm text-gray-300 leading-relaxed">
+                <!-- Insights generated by JS will appear here -->
+                Carregando inteligência de dados...
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Chart 1: Modelos por Cidade -->
+            <div class="glass-panel p-6 rounded-xl">
+                <h2 class="text-sm uppercase tracking-widest font-semibold mb-6 text-white text-center">Desempenho de Modelos</h2>
+                <div class="relative h-72 w-full">
+                    <canvas id="chartModelsByCity"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 2: Vendas por Ano do Modelo -->
+            <div class="glass-panel p-6 rounded-xl">
+                <h2 class="text-sm uppercase tracking-widest font-semibold mb-6 text-white text-center">Vendas por Model Year</h2>
+                <div class="relative h-72 w-full">
+                    <canvas id="chartSalesByYear"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 3: Métodos de Pagamento (Doughnut) -->
+            <div class="glass-panel p-6 rounded-xl lg:col-span-2">
+                <h2 class="text-sm uppercase tracking-widest font-semibold mb-6 text-white text-center">Distribuição de Meios de Pagamento</h2>
+                <div class="relative h-72 w-full flex justify-center">
+                    <canvas id="chartPayMethods"></canvas>
+                </div>
+            </div>
+
+        </section>
+        
+        <footer class="mt-8 text-center text-xs text-gray-600 pb-4">
+            Simulação de Dashboard Analítica © Porsche Style Guidelines - Mock Data Source: 8683bed0-cc33-4e06-bca9-04db9c31f9e2.xlsx
+        </footer>
+
+    </main>
+
+    <script>
+        // Configuração Global do Chart.js para o tema Dark
+        Chart.defaults.color = '#9CA3AF';
+        Chart.defaults.font.family = 'Inter';
+        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+        Chart.defaults.plugins.tooltip.titleColor = '#fff';
+        Chart.defaults.plugins.tooltip.padding = 10;
+        Chart.defaults.plugins.tooltip.borderColor = 'rgba(213, 0, 28, 0.5)';
+        Chart.defaults.plugins.tooltip.borderWidth = 1;
+
+        // Variáveis globais para os gráficos
+        let chartModels, chartYears, chartPay;
+        
+        // --- 1. GERAÇÃO DE DADOS (Simulando a leitura da planilha 8683bed0-cc33-4e06-bca9-04db9c31f9e2.xlsx) ---
+        const MOCK_MODELS = ['911 Carrera', 'Macan', 'Cayenne', 'Taycan', 'Panamera'];
+        const MOCK_YEARS = ['2021', '2022', '2023', '2024'];
+        const MOCK_CITIES = ['São Paulo', 'Rio de Janeiro', 'Curitiba', 'Belo Horizonte', 'Brasília'];
+        const MOCK_PAYMENTS = ['À Vista', 'Financiamento', 'Leasing', 'Consórcio'];
+
+        // Função para gerar dados realistas baseados no comportamento comum (SUVs vendem mais, SP vende mais)
+        function generateMockData(numRows = 800) {
+            const data = [];
+            for (let i = 0; i < numRows; i++) {
+                // Pesos para tornar os dados mais realistas
+                let model = MOCK_MODELS[Math.floor(Math.random() * MOCK_MODELS.length)];
+                if(Math.random() > 0.6) model = 'Macan'; // Macan é mais popular
+                if(Math.random() > 0.8) model = 'Cayenne';
+
+                let city = MOCK_CITIES[Math.floor(Math.random() * MOCK_CITIES.length)];
+                if(Math.random() > 0.5) city = 'São Paulo'; // SP tem maior mercado
+
+                let year = MOCK_YEARS[Math.floor(Math.random() * MOCK_YEARS.length)];
+                
+                let pay = MOCK_PAYMENTS[Math.floor(Math.random() * MOCK_PAYMENTS.length)];
+                if(Math.random() > 0.4) pay = 'Financiamento';
+
+                data.push({
+                    id: i + 1,
+                    model: model,
+                    year: year,
+                    city: city,
+                    payMethod: pay
+                });
+            }
+            return data;
+        }
+
+        const rawData = generateMockData();
+        let filteredData = [...rawData];
+
+        // --- 2. INICIALIZAÇÃO DE FILTROS ---
+        function populateFilters() {
+            const populate = (id, options) => {
+                const select = document.getElementById(id);
+                options.forEach(opt => {
+                    const el = document.createElement('option');
+                    el.value = opt;
+                    el.textContent = opt;
+                    select.appendChild(el);
+                });
+            };
+
+            populate('filter-model', MOCK_MODELS);
+            populate('filter-year', MOCK_YEARS);
+            populate('filter-city', MOCK_CITIES);
+            populate('filter-pay', MOCK_PAYMENTS);
+        }
+
+        // --- 3. LÓGICA DE ATUALIZAÇÃO DA DASHBOARD ---
+        
+        // Utilitário para agrupar e contar
+        function aggregateBy(data, key) {
+            return data.reduce((acc, row) => {
+                acc[row[key]] = (acc[row[key]] || 0) + 1;
+                return acc;
+            }, {});
+        }
+
+        function getTopItem(aggregatedObj) {
+            let topItem = 'N/A';
+            let maxCount = 0;
+            for (const [key, value] of Object.entries(aggregatedObj)) {
+                if (value > maxCount) {
+                    maxCount = value;
+                    topItem = key;
+                }
+            }
+            return { item: topItem, count: maxCount };
+        }
+
+        function updateKPIsAndInsights() {
+            // KPIs
+            document.getElementById('kpi-total-sales').textContent = filteredData.length;
+
+            const modelsCount = aggregateBy(filteredData, 'model');
+            const topModel = getTopItem(modelsCount);
+            document.getElementById('kpi-top-model').textContent = topModel.item;
+            document.getElementById('kpi-top-model-vol').textContent = `${topModel.count} unidades`;
+
+            const citiesCount = aggregateBy(filteredData, 'city');
+            const topCity = getTopItem(citiesCount);
+            document.getElementById('kpi-top-city').textContent = topCity.item;
+            document.getElementById('kpi-top-city-vol').textContent = `${topCity.count} unidades`;
+
+            const yearsCount = aggregateBy(filteredData, 'year');
+            const topYear = getTopItem(yearsCount);
+            document.getElementById('kpi-top-year').textContent = topYear.item;
+            document.getElementById('kpi-top-year-vol').textContent = `${topYear.count} unidades`;
+
+            // INSIGHTS GERADOS AUTOMATICAMENTE
+            const insightsContainer = document.getElementById('insights-container');
+            insightsContainer.innerHTML = ''; // Clear
+            
+            if (filteredData.length === 0) {
+                insightsContainer.innerHTML = '<p class="text-red-400">Não há dados para os filtros selecionados.</p>';
+                return;
+            }
+
+            const activeCity = document.getElementById('filter-city').value;
+            const activeModel = document.getElementById('filter-model').value;
+
+            let insightsHTML = '';
+
+            // Pergunta de negócio 1: Insight de carros populares por cidade
+            if (activeCity !== 'all') {
+                const totalInCity = filteredData.length;
+                const perc = ((topModel.count / totalInCity) * 100).toFixed(1);
+                insightsHTML += `<p>• Em <strong>${activeCity}</strong>, o modelo de maior aderência é o <span class="text-white font-bold">${topModel.item}</span>, representando <span class="text-porsche-red font-bold">${perc}%</span> de todas as vendas da região.</p>`;
+            } else {
+                insightsHTML += `<p>• Globalmente, o <span class="text-white font-bold">${topModel.item}</span> domina o mercado com ${topModel.count} vendas, indicando forte preferência por este segmento.</p>`;
+            }
+
+            // Pergunta de negócio 2: Ano do modelo que mais saiu
+            insightsHTML += `<p>• O <strong>Model Year</strong> com maior giro no cenário atual é o <span class="text-white font-bold">${topYear.item}</span>, acumulando ${topYear.count} emplacamentos documentados.</p>`;
+
+            // Pergunta de negócio 3: Meio de pagamento vs Modelo
+            const payCount = aggregateBy(filteredData, 'payMethod');
+            const topPay = getTopItem(payCount);
+            const contextText = activeModel !== 'all' ? `para o modelo ${activeModel}` : 'no portfólio geral';
+            insightsHTML += `<p>• A preferência financeira primária ${contextText} é <strong>${topPay.item}</strong>. Ajustar campanhas de marketing voltadas para esta modalidade pode acelerar conversões.</p>`;
+
+            insightsContainer.innerHTML = insightsHTML;
+        }
+
+        function updateCharts() {
+            // 1. Modelos
+            const modelsAgg = aggregateBy(filteredData, 'model');
+            const modelsLabels = Object.keys(modelsAgg).sort((a,b) => modelsAgg[b] - modelsAgg[a]);
+            const modelsData = modelsLabels.map(label => modelsAgg[label]);
+
+            if (chartModels) chartModels.destroy();
+            const ctx1 = document.getElementById('chartModelsByCity').getContext('2d');
+            
+            // Gradient for bars
+            const gradient1 = ctx1.createLinearGradient(0, 0, 0, 400);
+            gradient1.addColorStop(0, '#D5001C');
+            gradient1.addColorStop(1, 'rgba(213, 0, 28, 0.2)');
+
+            chartModels = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: modelsLabels,
+                    datasets: [{
+                        label: 'Unidades Vendidas',
+                        data: modelsData,
+                        backgroundColor: gradient1,
+                        borderRadius: 4,
+                        barThickness: 'flex',
+                        maxBarThickness: 40
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // 2. Anos do Modelo
+            const yearsAgg = aggregateBy(filteredData, 'year');
+            const yearsLabels = MOCK_YEARS; // Keep chronological order
+            const yearsData = yearsLabels.map(label => yearsAgg[label] || 0);
+
+            if (chartYears) chartYears.destroy();
+            const ctx2 = document.getElementById('chartSalesByYear').getContext('2d');
+            chartYears = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: yearsLabels,
+                    datasets: [{
+                        label: 'Vendas por Ano',
+                        data: yearsData,
+                        borderColor: '#ffffff',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#D5001C',
+                        pointBorderColor: '#000',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // 3. Pagamentos
+            const payAgg = aggregateBy(filteredData, 'payMethod');
+            const payLabels = Object.keys(payAgg);
+            const payData = payLabels.map(label => payAgg[label]);
+
+            if (chartPay) chartPay.destroy();
+            const ctx3 = document.getElementById('chartPayMethods').getContext('2d');
+            chartPay = new Chart(ctx3, {
+                type: 'doughnut',
+                data: {
+                    labels: payLabels,
+                    datasets: [{
+                        data: payData,
+                        backgroundColor: [
+                            '#D5001C', // Red
+                            '#ffffff', // White
+                            '#4B5563', // Gray
+                            '#1f2937'  // Dark Gray
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#0A0A0A'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function applyFilters() {
+            const fModel = document.getElementById('filter-model').value;
+            const fYear = document.getElementById('filter-year').value;
+            const fCity = document.getElementById('filter-city').value;
+            const fPay = document.getElementById('filter-pay').value;
+
+            filteredData = rawData.filter(row => {
+                const matchModel = fModel === 'all' || row.model === fModel;
+                const matchYear = fYear === 'all' || row.year === fYear;
+                const matchCity = fCity === 'all' || row.city === fCity;
+                const matchPay = fPay === 'all' || row.payMethod === fPay;
+                return matchModel && matchYear && matchCity && matchPay;
+            });
+
+            updateKPIsAndInsights();
+            updateCharts();
+        }
+
+        // Listeners
+        document.querySelectorAll('select').forEach(select => {
+            select.addEventListener('change', applyFilters);
+        });
+
+        document.getElementById('reset-filters').addEventListener('click', () => {
+            document.querySelectorAll('select').forEach(select => select.value = 'all');
+            applyFilters();
+        });
+
+        // Inicialização quando a página carrega
+        window.addEventListener('DOMContentLoaded', () => {
+            populateFilters();
+            updateKPIsAndInsights();
+            updateCharts();
+        });
+
+    </script>
+</body>
+</html>
