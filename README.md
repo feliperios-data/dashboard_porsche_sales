@@ -22,7 +22,7 @@ Dashboard analítico web single-page desenvolvido para simular inteligência de 
 
 ## Como Executar
 
-A aplicação roda inteiramente no lado do cliente, sem necessidade de build ou servidor local [cite: 1].
+A aplicação roda inteiramente no lado do cliente, sem necessidade de build ou servidor local.
 
 1. Clone o repositório.
-2. Abra o arquivo `porsche_analytics_dashboard.html` diretamente em um navegador web [cite: 1].
+2. Abra o arquivo `porsche_analytics_dashboard.html` diretamente em um navegador web.
