@@ -1,5 +1,7 @@
 # Dashboard de Vendas da Porsche
 
+🔗 **Acesse o projeto online:** [Clique aqui para visualizar o Dashboard](https://feliperios-data.github.io/dashboard_porsche_sales/)
+
 Projeto desenvolvido para o desafio "Criando uma Dashboard da Porsche com Agentes de IA", parte do módulo "AI Reports com Excel, GPT Agents e Claude Code" da DIO (Digital Innovation One).
 
 ## Sobre o Projeto
@@ -22,7 +24,6 @@ Dashboard analítico web single-page desenvolvido para simular inteligência de 
 
 ## Como Executar
 
-A aplicação roda inteiramente no lado do cliente, sem necessidade de build ou servidor local.
+Basta acessar o link acima — a aplicação roda inteiramente no navegador, sem instalação ou download.
 
-1. Clone o repositório.
-2. Abra o arquivo `porsche_analytics_dashboard.html` diretamente em um navegador web.
+Alternativa local: clone o repositório e abra o arquivo `index.html` diretamente em um navegador web.
