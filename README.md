@@ -4,6 +4,11 @@
 
 Projeto desenvolvido para o desafio "Criando uma Dashboard da Porsche com Agentes de IA", parte do módulo "AI Reports com Excel, GPT Agents e Claude Code" da DIO (Digital Innovation One).
 
+## 📸 Demonstração
+
+![Dashboard de Vendas da Porsche](assets/dashboardporsche.png)
+*Painel de KPIs e gráficos interativos com filtros por modelo, cidade e método de pagamento*
+
 ## Sobre o Projeto
 
 Dashboard analítico web single-page desenvolvido para simular inteligência de vendas de modelos Porsche. A aplicação foca na exibição e filtragem de métricas de negócios, operando via mock data.
